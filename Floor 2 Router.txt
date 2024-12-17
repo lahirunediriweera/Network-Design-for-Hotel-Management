@@ -1,0 +1,122 @@
+Router>ena
+Router#conf t
+
+Router(config)#ho Floor-2-Router
+
+Floor-2-Router(config)#interface serial 0/1/0
+Floor-2-Router(config-if)#ip address 172.16.5.194 255.255.255.252
+Floor-2-Router(config-if)#no shut
+Floor-2-Router(config-if)#exit
+
+Floor-2-Router(config)#interface serial 0/1/1
+Floor-2-Router(config-if)#ip address 172.16.5.201 255.255.255.252
+Floor-2-Router(config-if)#clock rate 64000
+Floor-2-Router(config-if)#no shut
+Floor-2-Router(config-if)#exit
+
+Floor-2-Router(config)#do wr
+Building configuration...
+[OK]
+
+Floor-2-Router(config)#interface gigabitEthernet 0/0/0
+Floor-2-Router(config-if)#description SW-03-Link
+Floor-2-Router(config-if)#no ip address 
+Floor-2-Router(config-if)#no shut
+Floor-2-Router(config-if)#exit
+
+Floor-2-Router(config)#interface gigabitEthernet 0/0/0.4
+Floor-2-Router(config-subif)#encapsulation dot1Q 4
+Floor-2-Router(config-subif)#ip address 172.16.3.1 255.255.255.128
+Floor-2-Router(config-subif)#ip helper-address 172.16.0.2
+Floor-2-Router(config-subif)#no shut
+Floor-2-Router(config-subif)#exit
+
+Floor-2-Router(config)#interface gigabitEthernet 0/0/0.5
+Floor-2-Router(config-subif)#encapsulation dot1Q 5
+Floor-2-Router(config-subif)#ip address 172.16.3.129 255.255.255.128
+Floor-2-Router(config-subif)#ip helper-address 172.16.0.2
+Floor-2-Router(config-subif)#no shut 
+Floor-2-Router(config-subif)#exit
+
+Floor-2-Router(config)#interface gigabitEthernet 0/0/0.6
+Floor-2-Router(config-subif)#encapsulation dot1Q 6
+Floor-2-Router(config-subif)#ip address 172.16.4.1 255.255.255.128
+Floor-2-Router(config-subif)#ip helper-address 172.16.0.2
+Floor-2-Router(config-subif)#no shut
+Floor-2-Router(config-subif)#exit
+
+Floor-2-Router(config)#router ospf 10
+Floor-2-Router(config-router)#network 172.16.3.0 0.0.0.127 area 0
+Floor-2-Router(config-router)#network 172.16.3.128 0.0.0.127 area 0
+Floor-2-Router(config-router)#network 172.16.4.0 0.0.0.127 area 0
+Floor-2-Router(config-router)#network 172.16.5.192 0.0.0.3 area 0
+Floor-2-Router(config-router)#network 172.16.5.200 0.0.0.3 area 0
+Floor-2-Router(config-router)#
+
+Floor-2-Router(config)#logging host 172.16.0.2 
+Floor-2-Router(config)#logging on
+Floor-2-Router(config)#logging buffered
+Floor-2-Router(config)#logging console
+Floor-2-Router(config)#logging trap
+Floor-2-Router(config)#logging userinfo
+Floor-2-Router(config)#do wr
+
+Floor-2-Router(config)#ntp server 172.16.0.3 
+Floor-2-Router(config)#ntp server 172.16.0.3 key 1
+Floor-2-Router(config)#ntp authentication-key 1 md5 hotel@123
+Floor-2-Router(config)#ntp update-calendar
+Floor-2-Router(config)#ntp trusted-key 1
+Floor-2-Router(config)#service timestamps log datetime msec
+Floor-2-Router(config)#
+Floor-2-Router(config)#do wr
+
+Floor-2-Router(config)#banner motd *
+Enter TEXT message.  End with the character '*'.
+############################################################## 
+    This is a Secure area.Please enter your Authentication. 
+############################################################## *
+
+Floor-2-Router(config)#enable secret hotel@123
+Floor-2-Router(config)#
+
+Floor-2-Router(config)#line console 0
+Floor-2-Router(config-line)#password hotel@123
+Floor-2-Router(config-line)#exec-timeout 15
+Floor-2-Router(config-line)#login
+Floor-2-Router(config-line)#exit
+Floor-2-Router(config)#
+
+Floor-2-Router(config)#username Admin secret hotel@123
+Floor-2-Router(config)#ip domain-name cisco.lk
+Floor-2-Router(config)#crypto key generate rsa
+The name for the keys will be: Floor-2-Router.cisco.lk
+Choose the size of the key modulus in the range of 360 to 4096 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+
+How many bits in the modulus [512]: 1024
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+
+Floor-2-Router(config)#ip ssh version 2
+*Dec 17 19:55:16.381: %SSH-5-ENABLED: SSH 1.99 has been enabled
+Floor-2-Router(config)#
+
+Floor-2-Router(config)#line vty 0
+Floor-2-Router(config-line)#transport input ssh
+Floor-2-Router(config-line)#login local
+Floor-2-Router(config-line)#exec-timeout 15
+Floor-2-Router(config-line)#exit
+Floor-2-Router(config)#do wr
+Building configuration...
+[OK]
+Floor-2-Router(config)#exit
+Floor-2-Router#
+
+Floor-2-Router#copy running-config tftp: 
+Address or name of remote host []? 172.16.0.3
+Destination filename [Floor-2-Router-confg]? 
+
+Writing running-config...!!
+[OK - 2177 bytes]
+
+2177 bytes copied in 0.01 secs (217700 bytes/sec)

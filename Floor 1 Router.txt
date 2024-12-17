@@ -1,0 +1,133 @@
+Router>enable
+Router#conf t
+
+Router(config)#hostname Floor-1-Router
+
+Floor-1-Router(config)#interface gigabitEthernet 0/0/0
+Floor-1-Router(config-if)#description SW-01-Link
+Floor-1-Router(config-if)#ip address 172.16.0.1 255.255.255.0
+Floor-1-Router(config-if)#no shut
+Floor-1-Router(config-if)#exit
+
+Floor-1-Router(config)#interface gigabitEthernet 0/0/1
+Floor-1-Router(config-if)#description VLAN-SW-02
+Floor-1-Router(config-if)#no ip address 
+Floor-1-Router(config-if)#no shutdown 
+Floor-1-Router(config-if)#exit
+
+Floor-1-Router(config)#interface gigabitEthernet 0/0/1.2
+Floor-1-Router(config-subif)#encapsulation dot1Q 2
+Floor-1-Router(config-subif)#ip address 172.16.1.1 255.255.255.0
+Floor-1-Router(config-subif)#ip helper-address 172.16.0.2
+Floor-1-Router(config-subif)#no shutdown 
+Floor-1-Router(config-subif)#exit
+
+Floor-1-Router(config)#interface gigabitEthernet 0/0/1.3
+Floor-1-Router(config-subif)#encapsulation dot1Q 3
+Floor-1-Router(config-subif)#ip address 172.16.2.1 255.255.255.0
+Floor-1-Router(config-subif)#ip helper-address 172.16.0.2
+Floor-1-Router(config-subif)#no shutdown 
+Floor-1-Router(config-subif)#exit
+
+Floor-1-Router(config)#do wr
+Building configuration...
+[OK]
+
+Floor-1-Router(config)#interface serial 0/1/0
+Floor-1-Router(config-if)#description Floor-02-Router-Link
+Floor-1-Router(config-if)#ip address 172.16.5.193 255.255.255.252
+Floor-1-Router(config-if)#clock rate 64000
+Floor-1-Router(config-if)#no shut
+Floor-1-Router(config-if)#exit
+
+Floor-1-Router(config)#interface serial 0/2/0
+Floor-1-Router(config-if)#description Floor-2-Router-Link
+Floor-1-Router(config-if)#ip address 172.16.5.197 255.255.255.252
+Floor-1-Router(config-if)#clock rate 64000
+Floor-1-Router(config-if)#no shutdown
+Floor-1-Router(config-if)#exit
+
+Floor-1-Router(config)#do wr
+Building configuration...
+[OK]
+
+Floor-1-Router(config)#router ospf 10
+Floor-1-Router(config-router)#network 172.16.0.0 0.0.0.255 area 0
+Floor-1-Router(config-router)#network 172.16.1.0 0.0.0.255 area 0
+Floor-1-Router(config-router)#network 172.16.2.0 0.0.0.255 area 0
+Floor-1-Router(config-router)#network 172.16.5.192 0.0.0.3 area 0
+Floor-1-Router(config-router)#network 172.16.5.196 0.0.0.3 area 0
+Floor-1-Router(config-if)#exit
+
+Floor-1-Router(config)#logging host 172.16.0.2
+Floor-1-Router(config)#logging on
+Floor-1-Router(config)#logging buffered
+Floor-1-Router(config)#logging console
+Floor-1-Router(config)#logging trap
+Floor-1-Router(config)#logging userinfo
+Floor-1-Router(config)#exit
+
+Floor-1-Router(config)#ntp server 172.16.0.3
+Floor-1-Router(config)#ntp server 172.16.0.3 key 1
+Floor-1-Router(config)#ntp authentication-key 1 md5 hotel@123
+Floor-1-Router(config)#ntp update-calendar 
+Floor-1-Router(config)#ntp trusted-key 1
+Floor-1-Router(config)#service timestamps log datetime msec 
+Floor-1-Router(config)#do wr
+
+Floor-1-Router(config)#banner motd *
+Enter TEXT message.  End with the character '*'.
+############################################################## 
+    This is a Secure area.Please enter your Authentication. 
+############################################################## *
+
+Floor-1-Router(config)#enable secret hotel@123
+
+Floor-1-Router(config)#line console 0
+Floor-1-Router(config-line)#password hotel@123
+Floor-1-Router(config-line)#exec-timeout 15
+Floor-1-Router(config-line)#login
+Floor-1-Router(config-line)#exit
+Floor-1-Router(config)#
+
+Floor-1-Router(config)#username Admin secret hotel@123
+Floor-1-Router(config)#ip domain-name cisco.lk
+Floor-1-Router(config)#crypto key generate rsa
+The name for the keys will be: Floor-1-Router.cisco.lk
+Choose the size of the key modulus in the range of 360 to 4096 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+
+How many bits in the modulus [512]: 1024
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+
+Floor-1-Router(config)#ip ssh version 2
+*Dec 17 19:49:4.173: %SSH-5-ENABLED: SSH 1.99 has been enabled
+Floor-1-Router(config)#
+
+Floor-1-Router(config)#line vty 0
+Floor-1-Router(config-line)#transport input ssh
+Floor-1-Router(config-line)#login local
+Floor-1-Router(config-line)#exec-timeout 15
+Floor-1-Router(config-line)#exit
+Floor-1-Router(config)#
+
+Floor-1-Router(config)#service password-encryption 
+Floor-1-Router(config)#
+
+Floor-1-Router(config)#security passwords min-length 8
+Floor-1-Router(config)#
+
+Floor-1-Router(config)#login block 300 attempts 3 within 60
+Floor-1-Router(config)#
+Floor-1-Router(config)#do wr
+
+Floor-1-Router#copy running-config tftp: 
+Address or name of remote host []? 172.16.0.3
+Destination filename [Floor-1-Router-confg]? 
+
+Writing running-config...!!
+[OK - 2384 bytes]
+
+2384 bytes copied in 0.011 secs (216727 bytes/sec)
+Floor-1-Router#

@@ -1,0 +1,8 @@
+Switch>ena
+Switch#conf t
+
+Switch(config)#ho SW-01
+
+SW-01(config)#interface range fast
+SW-01(config)#interface range fastEthernet 0/5-24
+SW-01(config-if-range)#shutdown

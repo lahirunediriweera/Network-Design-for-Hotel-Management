@@ -1,0 +1,43 @@
+Switch>ena
+Switch#conf t
+
+Switch(config)#ho SW-04
+
+SW-04(config)#vlan 7
+SW-04(config-vlan)#name Reception-Dep
+SW-04(config-vlan)#exit
+
+SW-04(config)#vlan 8
+SW-04(config-vlan)#name Store-Dep
+SW-04(config-vlan)#exit
+
+SW-04(config)#vlan 9
+SW-04(config-vlan)#name Logistic-Dep
+SW-04(config-vlan)#exit
+
+SW-04(config)#interface range fastEthernet 0/1-5
+SW-04(config-if-range)#switchport mode access
+SW-04(config-if-range)#switchport access vlan 7
+SW-04(config-if-range)#exit
+
+SW-04(config)#interface range fastEthernet 0/6-10
+SW-04(config-if-range)#switchport mode access
+SW-04(config-if-range)#switchport access vlan 8
+SW-04(config-if-range)#exit
+
+SW-04(config)#interface range fastEthernet 0/11-15
+SW-04(config-if-range)#switchport mode access
+SW-04(config-if-range)#switchport access vlan 9
+SW-04(config-if-range)#exit
+
+SW-04(config)#do wr
+Building configuration...
+[OK]
+
+SW-04(config)#interface gigabitEthernet 0/1
+SW-04(config-if)#switchport mode trunk
+SW-04(config-if)#exit
+
+SW-04(config)#interface range fastEthernet 0/16-24
+SW-04(config-if-range)#shutdown
+
